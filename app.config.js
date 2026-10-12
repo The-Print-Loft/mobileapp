@@ -25,9 +25,14 @@ const API_BASE_URLS = {
 const STRIPE_PUBLISHABLE_KEYS = {
   // Test publishable key (public — safe to commit). Staging's API uses Stripe test
   // mode, so this pairs with test cards (4242…). Env var overrides if set.
+  //
+  // MUST come from the same Stripe account as the secret key the API uses
+  // (/printloft/stripe-secret-key in SSM): the API creates the PaymentIntent and
+  // the app confirms it, so a mismatched pair fails with "no such payment intent".
+  // This is The Print Loft sandbox, acct_1UPYprDitbijdasX.
   staging:
     process.env.STRIPE_PUBLISHABLE_KEY_TEST ||
-    'pk_test_51Tw8iHRosqdTTco1wxvyWMXBmln1f7B2WNbUggaWtUl8YazYdlUslauo5DJnvzAIBmW0qY3gJJihxuAFWZaTlMVb00ogvplBwQ',
+    'pk_test_51UPYprDitbijdasXnchD7MpEtSOH165P2gcHA597gsgyRsrFySBKx95F8HQQPK7tsBR9apBToRfxoJ5w5h5hN7Zh00XxwNyFs3',
   production: process.env.STRIPE_PUBLISHABLE_KEY_LIVE || '',
 };
 
