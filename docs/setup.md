@@ -29,7 +29,7 @@ no `.env`, no secrets to copy. `git clone` + `npm ci` is the whole story.
 until you authenticate:
 
 ```bash
-gh auth login          # GitHub.com → HTTPS → the account with pvcary-sds access
+gh auth login          # GitHub.com → HTTPS → the account with The-Print-Loft access
 gh auth setup-git
 ```
 
