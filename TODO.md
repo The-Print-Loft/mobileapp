@@ -1,7 +1,7 @@
 # TODO
 
-Tracked follow-ups for SameDaySnaps. Spans this app (`pvcary-sds/mobileapp`),
-the API (`pvcary-sds/api`), and Storyblok content. Check items off as they land;
+Tracked follow-ups for SameDaySnaps. Spans this app (`The-Print-Loft/mobileapp`),
+the API (`The-Print-Loft/api`), and Storyblok content. Check items off as they land;
 add new ones here rather than leaving them only in chat/session notes.
 
 ## API + CMS
@@ -480,7 +480,7 @@ Prodigi supports cancellation (`POST /v4.0/orders/{id}/actions/cancel`), but it 
       do anything yet. Give each an `onPress` (open the doc — in-app screen or the
       hosted URL via `Linking`).
 - [ ] **"Track your order" screen.** The API now stores each placed order and keeps
-      it fresh from Prodigi webhooks (`pvcary-sds/api` — the `orders` table +
+      it fresh from Prodigi webhooks (`The-Print-Loft/api` — the `orders` table +
       `POST /v1/webhooks/prodigi`). Build a screen that polls `GET /v1/orders/:id`
       and shows `stage`/`progress`, the shipment **`dispatchDate`** + carrier +
       **tracking** link, and per-item status. Reachable from the Confirmation step
