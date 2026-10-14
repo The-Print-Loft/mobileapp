@@ -13,8 +13,8 @@ import { DevSettings } from 'react-native';
 export type AppEnvironment = 'staging' | 'production';
 
 export const ENVIRONMENTS: Record<AppEnvironment, { label: string; apiBaseUrl: string }> = {
-  staging: { label: 'Staging', apiBaseUrl: 'https://api.dev.samedaysnaps.com/v1' },
-  production: { label: 'Production', apiBaseUrl: 'https://api.samedaysnaps.com/v1' },
+  staging: { label: 'Staging', apiBaseUrl: 'https://api.dev.theprintloft.shop/v1' },
+  production: { label: 'Production', apiBaseUrl: 'https://api.theprintloft.shop/v1' },
 };
 
 /** The environment baked into THIS build (from app.config.ts). Defaults to staging. */

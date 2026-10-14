@@ -28,7 +28,7 @@ const StripeProvider: ComponentType<StripeProviderProps> | null = isStripeNative
 export function AppStripeProvider({ children }: { children: ReactNode }) {
   if (!StripeProvider) return <>{children}</>;
   return (
-    <StripeProvider publishableKey={getStripePublishableKey()} urlScheme="mobileapp">
+    <StripeProvider publishableKey={getStripePublishableKey()} urlScheme="printloft">
       {children}
     </StripeProvider>
   );
