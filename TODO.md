@@ -1,7 +1,7 @@
 # TODO
 
-Tracked follow-ups for SameDaySnaps. Spans this app (`pvcary-sds/mobileapp`),
-the API (`pvcary-sds/api`), and Storyblok content. Check items off as they land;
+Tracked follow-ups for SameDaySnaps. Spans this app (`The-Print-Loft/mobileapp`),
+the API (`The-Print-Loft/api`), and Storyblok content. Check items off as they land;
 add new ones here rather than leaving them only in chat/session notes.
 
 ## API + CMS
@@ -480,7 +480,7 @@ Prodigi supports cancellation (`POST /v4.0/orders/{id}/actions/cancel`), but it 
       do anything yet. Give each an `onPress` (open the doc — in-app screen or the
       hosted URL via `Linking`).
 - [ ] **"Track your order" screen.** The API now stores each placed order and keeps
-      it fresh from Prodigi webhooks (`pvcary-sds/api` — the `orders` table +
+      it fresh from Prodigi webhooks (`The-Print-Loft/api` — the `orders` table +
       `POST /v1/webhooks/prodigi`). Build a screen that polls `GET /v1/orders/:id`
       and shows `stage`/`progress`, the shipment **`dispatchDate`** + carrier +
       **tracking** link, and per-item status. Reachable from the Confirmation step
@@ -506,22 +506,38 @@ Checkout runs end to end on **staging** (Stripe **test** mode + sandbox Prodigi)
 Before it can take real money in **production**, the following must be in place. See
 [`docs/checkout.md`](docs/checkout.md) for how each piece is wired today.
 
+> **The brand moved to a new Stripe account** (The Print Loft,
+> `acct_1UPYprDitbijdasX`) as part of the AWS/account migration. Staging now uses
+> that account's sandbox: its `pk_test_…` is in `app.config.js`, its `sk_test_…` in
+> SSM at `/printloft/stripe-secret-key`.
+>
+> **Publishable and secret keys must be a matched pair from the same account.** The
+> API creates the PaymentIntent and the app confirms it; a cross-account pair fails
+> with "no such payment intent". That is the trap to avoid when adding the live keys.
+
 **Account & payouts**
-- [ ] **Activate the Stripe account for live payments** — business details,
-      identity verification, and a **payout bank account** + schedule. A test-mode
-      account cannot take live charges.
+- [ ] **Activate THE PRINT LOFT Stripe account for live payments** — business
+      details, identity verification, and a **payout bank account** + schedule. A
+      test-mode account cannot take live charges. Until this is done the new account
+      has no live keys at all.
 - [ ] **Statement descriptor + branding** — set the descriptor that shows on the
       customer's card statement, plus business name, support email/phone, and the
       brand logo/color (used on the PaymentSheet + receipts).
 - [ ] **Receipts** — enable Stripe email receipts in **live** mode (or decide we
       send our own).
 
-**Keys**
+**Keys** — both live keys must come from the **Print Loft** account, as a pair
 - [ ] **Live publishable key** — `app.config.js` `production` is empty. Set
       `STRIPE_PUBLISHABLE_KEY_LIVE` (EAS production env) or paste the `pk_live_…`.
-- [ ] **Live secret key on the API** — the production API (`pvcary-sds/api`) must
-      have the `sk_live_…` in **SSM** for the prod environment (staging uses the
-      test secret). Confirm the prod deploy reads it.
+- [ ] **Live secret key on the API** — production reads
+      `/printloft/stripe-secret-key-live` from **SSM** in account `206336709464`.
+- [ ] **Check which account the current `rk_live_…` belongs to.** A restricted key
+      was written to that parameter before the Print Loft account existed in live
+      mode, so it is probably the old account's — which would fail the pairing rule
+      above. Replace it with a live key from the Print Loft account.
+- [ ] **If keeping a restricted (`rk_live_…`) key, grant it Write on** PaymentIntents,
+      Refunds **and Tax calculations**. Tax calculations runs first in checkout, so a
+      missing permission there blocks the whole flow, not just the final charge.
 
 **Payment methods (settings are PER-MODE — test ≠ live)**
 - [ ] **Re-do the payment-method selection in LIVE mode** — enable **card, Apple

@@ -5,8 +5,8 @@ This is the ordered checklist to take **real money in production**. See
 [checkout.md](./checkout.md) for how each piece is wired today, and
 [`TODO.md`](../TODO.md) for the source backlog this expands on.
 
-> **Spans two repos.** The app (`pvcary-sds/mobileapp`) holds the publishable key +
-> PaymentSheet; the API (`pvcary-sds/api`) holds the secret key, PaymentIntents, Stripe
+> **Spans two repos.** The app (`The-Print-Loft/mobileapp`) holds the publishable key +
+> PaymentSheet; the API (`The-Print-Loft/api`) holds the secret key, PaymentIntents, Stripe
 > Tax, and (to be built) the reconciliation webhook. Items below are tagged
 > **[app]**, **[api]**, or **[dashboard/ops]**.
 
