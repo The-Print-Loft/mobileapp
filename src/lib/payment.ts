@@ -95,7 +95,7 @@ export async function runCheckout(input: CheckoutFlowInput): Promise<CheckoutFlo
   const { clientSecret, paymentIntentId } = checkout.checkout.payment;
 
   const init = await initPaymentSheet({
-    merchantDisplayName: 'SameDaySnaps',
+    merchantDisplayName: 'The Print Loft',
     paymentIntentClientSecret: clientSecret,
     returnURL: 'mobileapp://stripe-redirect', // for 3DS / bank redirects
     defaultBillingDetails: { email: recipient.email, name: recipient.name },
