@@ -1,21 +1,21 @@
 {
   "expo": {
-    "name": "SameDaySnaps",
+    "name": "The Print Loft",
     "slug": "same-day-snaps",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobileapp",
+    "scheme": "printloft",
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.samedaysnaps.app",
+      "bundleIdentifier": "com.theprintloft.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.samedaysnaps.app",
+      "package": "com.theprintloft.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

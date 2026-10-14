@@ -12,8 +12,8 @@
  * transpilation, which fails under some Node versions.
  */
 const API_BASE_URLS = {
-  staging: 'https://api.dev.samedaysnaps.com/v1',
-  production: 'https://api.samedaysnaps.com/v1',
+  staging: 'https://api.dev.theprintloft.shop/v1',
+  production: 'https://api.theprintloft.shop/v1',
 };
 
 /**
