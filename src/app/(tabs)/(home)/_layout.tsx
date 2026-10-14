@@ -25,7 +25,7 @@ export default function HomeStackLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: 'SameDaySnaps',
+          title: 'The Print Loft',
           headerLeft: () => <DevEnvSwitcher />,
           headerRight: () => <HeaderCartButton />,
         }}
