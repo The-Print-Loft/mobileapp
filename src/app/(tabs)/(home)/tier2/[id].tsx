@@ -1,13 +1,18 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getTier2 } from '@/api/catalog';
 import type { CatalogItem } from '@/api/types';
-import { CatalogCard } from '@/components/catalog-card';
 import { ScreenState } from '@/components/screen-state';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import {
+  Tier2Card,
+  TIER2_LIST_GAP,
+  TIER2_LIST_PADDING,
+} from '@/components/tier2-card';
+import { BottomTabInset } from '@/constants/theme';
 import { useAsync } from '@/hooks/use-async';
 
 /**
@@ -16,6 +21,7 @@ import { useAsync } from '@/hooks/use-async';
  * which ScreenState renders as an error.
  */
 export default function Tier2Screen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { id, title } = useLocalSearchParams<{ id: string; title?: string }>();
 
@@ -44,9 +50,15 @@ export default function Tier2Screen() {
           data={data ?? []}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <CatalogCard item={item} onPress={() => openProduct(item)} />
+            <Tier2Card item={item} onPress={() => openProduct(item)} />
           )}
-          contentContainerStyle={styles.list}
+          // The liquid-glass tab bar floats OVER the list, so the last card's
+          // Select button sits behind it without this. Orders and Cart already
+          // add the same allowance; tier2 and the catalog grid did not.
+          contentContainerStyle={[
+            styles.list,
+            { paddingBottom: TIER2_LIST_PADDING + BottomTabInset + insets.bottom },
+          ]}
         />
       </ScreenState>
     </ThemedView>
@@ -58,7 +70,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   list: {
-    padding: Spacing.three,
-    gap: Spacing.three,
+    paddingHorizontal: TIER2_LIST_PADDING,
+    paddingTop: TIER2_LIST_PADDING,
+    // paddingBottom is applied inline — it needs the tab-bar inset.
+    rowGap: TIER2_LIST_GAP,
   },
 });
