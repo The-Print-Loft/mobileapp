@@ -18,22 +18,67 @@ npm install
 npx expo start        # dev; press i for iOS simulator, a for Android
 ```
 
-By default a **dev** build talks to **staging** (`api.dev.samedaysnaps.com`); a
-release build talks to **production**. Override with `EXPO_PUBLIC_API_BASE`.
+## Environments & branches
+
+**Full setup & release process: [`DEVELOPMENT.md`](./DEVELOPMENT.md).** Summary:
+
+Two environments, each a different SDS API:
+
+| Environment | API | Built from |
+|---|---|---|
+| **staging** | `api.dev.samedaysnaps.com` | `main` |
+| **production** | `api.samedaysnaps.com` | `release` |
+
+**How it's wired.** Each build is pinned to an environment at build time:
+`app.config.ts` reads `APP_ENV` (set by the EAS build profile in `eas.json`) and
+exposes it to the app as `expoConfig.extra.environment` / `.apiBaseUrl`. The API
+client reads it via `src/api/environment.ts`. With no `APP_ENV` (plain
+`npx expo start`) it defaults to **staging**.
+
+**Branch flow.** Feature branches → PR → `main` (staging). To ship, merge
+`main` → `release` (production). Mirrors the branch-per-environment model, just
+`release`-as-production instead of the API repo's `main`-as-production.
+
+**Switching while developing.** Dev builds show an environment pill in the Home
+header — tap it to flip staging ↔ production (persisted, reloads the app).
+Production builds never show it. `EXPO_PUBLIC_API_BASE` still overrides everything
+(e.g. a local tunnel).
+
+**Builds** (needs an Expo account): `eas login` && `eas init` once, then
+`eas build --profile staging` / `--profile production`.
 
 ## Project layout
 
 ```
 src/
-  api/          API client (config, typed client, catalog calls, response types)
+  api/          API client — environment (base URL), client, catalog, coupons, types
   app/          expo-router screens
-    index.tsx           tier1 — landing categories
-    tier2/[id].tsx      tier2 — sub-catalog
-    product/[id].tsx    product page (copy, images, sizes)
-  components/   ThemedText/View, CatalogCard, ScreenState
+    _layout.tsx           root stack: the tab group + the full-screen builder
+    (tabs)/
+      _layout.tsx         bottom tab bar (Home, Gallery, Cart, Orders)
+      (home)/             Home tab — browse stack (tier1 → tier2 → product page)
+      cart/               Cart tab — rows, stepper, promo/coupons, summary, checkout
+      gallery.tsx         placeholder tab
+      orders.tsx          Orders tab (empty state)
+    builder/[sku].tsx     photo customizer (crop / filter / adjust / pinch-zoom)
+  components/   toast + toast-host, cart-icon, catalog/tier cards, adjust-slider,
+                zoom-pan-frame, skia-photo, screen-state, dev-env-switcher, …
   hooks/        useAsync (load/error/retry), theme + color-scheme hooks
-  lib/          helpers (html → text)
+  lib/          module stores (cart-store, selection-store, toast-store) + helpers
 ```
+
+## Docs
+
+Feature deep-dives live in [`docs/`](./docs):
+
+- **[cart.md](./docs/cart.md)** — the Cart: local store, rows/stepper, edit-in-place,
+  promo codes + product-based coupons, the reusable toast, summary, cart badges.
+- **[customize-builder.md](./docs/customize-builder.md)** — the builder: crop, filters,
+  the adjust slider, pinch-zoom/pan, and the WYSIWYG Prodigi print frame.
+- **[photo-flow.md](./docs/photo-flow.md)** — browse → select → build → add to cart.
+
+The **API** contract lives in the API repo's `API.md` (coupons: `GET /v1/coupons`,
+`POST /v1/coupons/validate`, and the discount enforcement at `POST /v1/checkout`).
 
 ## The browse flow
 
@@ -45,6 +90,12 @@ the required `appversion` header; Prodigi endpoints send `fulfillmentType: "prod
 
 ## Status
 
-Built: project scaffold, API client, and the browse slice (tier1 → tier2 →
-product page with size selection). Next: print-area-sizes + photo pick/upload,
-then Stripe checkout.
+Built: the **browse** slice (tier1 → tier2 → product page), the **builder**
+(photo pick → crop / filter / adjust / pinch-zoom against the real Prodigi print
+area), the **cart** (local store, quantity stepper, edit-in-place, promo codes +
+product-based **coupons**, summary), a reusable **toast** system, and the
+cart-count badges. See [Docs](#docs) for the deep-dives.
+
+Next: **checkout** — render + upload each print → Stripe PaymentIntent (with the
+applied coupon discount) → Prodigi order — plus collecting the customer **email at
+checkout** (which binds the 1×-per-customer coupon limit) and **cart persistence**.
