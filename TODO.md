@@ -558,9 +558,29 @@ Before it can take real money in **production**, the following must be in place.
       refund fails silently and has to be issued by hand.
 
 **Payment methods (settings are PER-MODE — test ≠ live)**
-- [ ] **Re-do the payment-method selection in LIVE mode** — enable **card, Apple
-      Pay, Amazon Pay**; disable Link, Cash App, Affirm, Klarna, bank debits (the
-      test-mode choices don't carry over).
+- [ ] **Re-do the payment-method selection in LIVE mode** (test-mode choices don't
+      carry over). Recommended set: **card, Apple Pay, Link, Amazon Pay**.
+
+      **Why, rather than just a list:**
+
+      - **ACH Direct Debit must be off — this one is technical, not a preference.**
+        `POST /v1/orders` refuses to place the Prodigi order unless the
+        PaymentIntent is already paid (`routes/order.ts`, `PAYMENT_NOT_COMPLETED`).
+        ACH settles over days and can reverse afterwards, so the customer pays and
+        gets a 402 with no order — or we ship and the debit later reverses.
+        Any delayed-notification method has the same problem.
+      - **BNPL (Klarna, Afterpay, Affirm) is an economics call.** Stripe charges
+        ~5.99% + 30¢ against 2.9% + 30¢ for cards. On a $65 framed print that is
+        ~$4.20 vs ~$2.19 — about two points of a twelve-point target margin.
+        Worth revisiting if average order value rises: BNPL tends to lift AOV, and
+        on a $200 order the extra fee is easier to carry.
+      - **Link is worth keeping.** It is Stripe's saved-payment feature at card
+        rates, and it speeds up repeat checkout. It was on the original "disable"
+        list with no recorded reason.
+      - **Cash App Pay** — card-like economics, narrow audience. No strong
+        argument either way; leave off until there's a reason.
+      - **Card, Apple Pay, Amazon Pay** — all confirm synchronously and price at
+        or near card rates.
 - [ ] **Apple Pay** — create an **Apple Merchant ID**, register it in the Stripe
       Dashboard (Apple Pay settings), set the config plugin's `merchantIdentifier`
       in `app.json`, and cut a **new EAS build**. Required both for Apple Pay inside
