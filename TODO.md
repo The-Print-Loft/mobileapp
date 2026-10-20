@@ -500,6 +500,25 @@ Prodigi supports cancellation (`POST /v4.0/orders/{id}/actions/cancel`), but it 
 - [ ] **Collapse redundant `CartItem` fields.** `title` / `size` / `price` /
       `productId` / `sku` duplicate what's already in `selection`; derive them.
 
+## App icon — Android adaptive icon still to do
+
+The iOS icon is done (sage green framed print, `assets/images/icon.png`, and
+`ios.icon` now points at it rather than Expo's sample Icon Composer bundle).
+
+Android is **not** done. It still ships Expo's sample adaptive icon:
+
+- [ ] **`android-icon-foreground.png`** — the frame artwork on a **transparent**
+      background, 1024×1024, with everything inside the central **66%** (a 672×672
+      area). Android masks the icon to a circle/squircle and animates it, so art
+      outside that is clipped. The current 1024 artwork fills the canvas edge to
+      edge, so a straight copy loses the shelf and the leaning photo.
+- [ ] **`adaptiveIcon.backgroundColor`** — set to the icon's sage green, replacing
+      `#E6F4FE`, and drop `backgroundImage` (or re-export it at 1024×1024).
+- [ ] **`android-icon-monochrome.png`** — 1024×1024 silhouette on transparent, for
+      Android 13+ themed icons. Currently 432×432 and from the sample.
+
+Also still Expo's sample: `assets/expo.icon/` is now unused and can be deleted.
+
 ## Stripe — production readiness
 
 Checkout runs end to end on **staging** (Stripe **test** mode + sandbox Prodigi).

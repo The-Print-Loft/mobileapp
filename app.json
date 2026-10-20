@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "The Print Loft",
+    "name": "Print Loft",
     "slug": "same-day-snaps",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "scheme": "printloft",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.theprintloft.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
