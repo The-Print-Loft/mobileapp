@@ -10,9 +10,9 @@ business. It consumes the SDS API; it never talks to Prodigi / Stripe / Storyblo
 ## Three repos, one product
 | Repo | What it is | Visibility |
 |---|---|---|
-| **`pvcary-sds/mobileapp`** (this) | this customer app | public |
-| `pvcary-sds/api` | the API this app calls (staging: `https://api.dev.samedaysnaps.com/v1`) | private |
-| `pvcary-sds/web` | Next.js + Storyblok marketing site | private |
+| **`The-Print-Loft/mobileapp`** (this) | this customer app | public |
+| `The-Print-Loft/api` | the API this app calls (staging: `https://api.dev.samedaysnaps.com/v1`) | private |
+| `The-Print-Loft/web` | Next.js + Storyblok marketing site | private |
 
 ## Read these first
 - **[docs/setup.md](./docs/setup.md)** — local setup + build gotchas (use `npm ci`, the

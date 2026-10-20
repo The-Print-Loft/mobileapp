@@ -1,7 +1,7 @@
 # TODO
 
-Tracked follow-ups for SameDaySnaps. Spans this app (`pvcary-sds/mobileapp`),
-the API (`pvcary-sds/api`), and Storyblok content. Check items off as they land;
+Tracked follow-ups for SameDaySnaps. Spans this app (`The-Print-Loft/mobileapp`),
+the API (`The-Print-Loft/api`), and Storyblok content. Check items off as they land;
 add new ones here rather than leaving them only in chat/session notes.
 
 ## API + CMS
@@ -480,7 +480,7 @@ Prodigi supports cancellation (`POST /v4.0/orders/{id}/actions/cancel`), but it 
       do anything yet. Give each an `onPress` (open the doc — in-app screen or the
       hosted URL via `Linking`).
 - [ ] **"Track your order" screen.** The API now stores each placed order and keeps
-      it fresh from Prodigi webhooks (`pvcary-sds/api` — the `orders` table +
+      it fresh from Prodigi webhooks (`The-Print-Loft/api` — the `orders` table +
       `POST /v1/webhooks/prodigi`). Build a screen that polls `GET /v1/orders/:id`
       and shows `stage`/`progress`, the shipment **`dispatchDate`** + carrier +
       **tracking** link, and per-item status. Reachable from the Confirmation step
@@ -525,27 +525,64 @@ Checkout runs end to end on **staging** (Stripe **test** mode + sandbox Prodigi)
 Before it can take real money in **production**, the following must be in place. See
 [`docs/checkout.md`](docs/checkout.md) for how each piece is wired today.
 
+> **The brand moved to a new Stripe account** (The Print Loft,
+> `acct_1UPYprDitbijdasX`) as part of the AWS/account migration. Staging now uses
+> that account's sandbox: its `pk_test_…` is in `app.config.js`, its `sk_test_…` in
+> SSM at `/printloft/stripe-secret-key`.
+>
+> **Publishable and secret keys must be a matched pair from the same account.** The
+> API creates the PaymentIntent and the app confirms it; a cross-account pair fails
+> with "no such payment intent". That is the trap to avoid when adding the live keys.
+
 **Account & payouts**
-- [ ] **Activate the Stripe account for live payments** — business details,
-      identity verification, and a **payout bank account** + schedule. A test-mode
-      account cannot take live charges.
+- [ ] **Activate THE PRINT LOFT Stripe account for live payments** — business
+      details, identity verification, and a **payout bank account** + schedule. A
+      test-mode account cannot take live charges. Until this is done the new account
+      has no live keys at all.
 - [ ] **Statement descriptor + branding** — set the descriptor that shows on the
       customer's card statement, plus business name, support email/phone, and the
       brand logo/color (used on the PaymentSheet + receipts).
 - [ ] **Receipts** — enable Stripe email receipts in **live** mode (or decide we
       send our own).
 
-**Keys**
-- [ ] **Live publishable key** — `app.config.js` `production` is empty. Set
-      `STRIPE_PUBLISHABLE_KEY_LIVE` (EAS production env) or paste the `pk_live_…`.
-- [ ] **Live secret key on the API** — the production API (`pvcary-sds/api`) must
-      have the `sk_live_…` in **SSM** for the prod environment (staging uses the
-      test secret). Confirm the prod deploy reads it.
+**Keys** — both live keys must come from the **Print Loft** account, as a pair
+- [x] **Live publishable key** — `pk_live_51UPYpkDGE12oriKb…` is in `app.config.js`.
+- [x] **Live secret key on the API** — a restricted key is in
+      `/printloft/stripe-secret-key-live` (SSM, account `206336709464`).
+- [x] **Account checked** — the `rk_live_…` in SSM is from `acct_1UPYpkDGE12oriKb`,
+      the activated Print Loft account, so it pairs correctly with the live
+      publishable key in `app.config.js`.
+- [x] **Restricted key permissions verified** — PaymentIntents, Tax calculations,
+      Charges and Refunds all have Write. Refunds matter for order cancellation:
+      without it `POST /v1/orders/:id/cancel` still cancels at Prodigi but the
+      refund fails silently and has to be issued by hand.
 
 **Payment methods (settings are PER-MODE — test ≠ live)**
-- [ ] **Re-do the payment-method selection in LIVE mode** — enable **card, Apple
-      Pay, Amazon Pay**; disable Link, Cash App, Affirm, Klarna, bank debits (the
-      test-mode choices don't carry over).
+- [x] **Payment methods selected in LIVE mode** (2026-10-20): **card, Apple Pay,
+      Amazon Pay, Cash App Pay**. Link and all BNPL are off, ACH is off.
+
+      **Why, rather than just a list:**
+
+      - **ACH Direct Debit must be off — this one is technical, not a preference.**
+        `POST /v1/orders` refuses to place the Prodigi order unless the
+        PaymentIntent is already paid (`routes/order.ts`, `PAYMENT_NOT_COMPLETED`).
+        ACH settles over days and can reverse afterwards, so the customer pays and
+        gets a 402 with no order — or we ship and the debit later reverses.
+        Any delayed-notification method has the same problem.
+      - **BNPL (Klarna, Afterpay, Affirm) is an economics call.** Stripe charges
+        ~5.99% + 30¢ against 2.9% + 30¢ for cards. On a $65 framed print that is
+        ~$4.20 vs ~$2.19 — about two points of a twelve-point target margin.
+        Worth revisiting if average order value rises: BNPL tends to lift AOV, and
+        on a $200 order the extra fee is easier to carry.
+      - **Link is off.** Card rates and faster repeat checkout, but its entire
+        value is returning customers and there are none at launch. It can also be
+        bank-funded in some configurations, which would hit the same
+        delayed-settlement problem as ACH — verify that before enabling it later.
+      - **Cash App Pay is on.** Card-like economics, confirms synchronously.
+        Note it redirects out of the app and back, so it depends on the
+        `returnURL` scheme being correct (fixed in #72).
+      - **Card, Apple Pay, Amazon Pay** — all confirm synchronously and price at
+        or near card rates.
 - [ ] **Apple Pay** — create an **Apple Merchant ID**, register it in the Stripe
       Dashboard (Apple Pay settings), set the config plugin's `merchantIdentifier`
       in `app.json`, and cut a **new EAS build**. Required both for Apple Pay inside

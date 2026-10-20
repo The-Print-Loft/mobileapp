@@ -97,4 +97,4 @@ one order line per cart item), so `stored.items[i]` names `order.items[i]`.
   (date/total/count); a stage badge would need a fetch per card.
 - **Pull-to-refresh + polling** on the detail while an order is in progress.
 - **Retail total in the order record** (server-side) so it doesn't rely on local
-  capture — see `pvcary-sds/api`.
+  capture — see `The-Print-Loft/api`.
