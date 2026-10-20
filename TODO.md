@@ -546,14 +546,12 @@ Before it can take real money in **production**, the following must be in place.
       send our own).
 
 **Keys** — both live keys must come from the **Print Loft** account, as a pair
-- [ ] **Live publishable key** — `app.config.js` `production` is empty. Set
-      `STRIPE_PUBLISHABLE_KEY_LIVE` (EAS production env) or paste the `pk_live_…`.
-- [ ] **Live secret key on the API** — production reads
-      `/printloft/stripe-secret-key-live` from **SSM** in account `206336709464`.
-- [ ] **Check which account the current `rk_live_…` belongs to.** A restricted key
-      was written to that parameter before the Print Loft account existed in live
-      mode, so it is probably the old account's — which would fail the pairing rule
-      above. Replace it with a live key from the Print Loft account.
+- [x] **Live publishable key** — `pk_live_51UPYpkDGE12oriKb…` is in `app.config.js`.
+- [x] **Live secret key on the API** — a restricted key is in
+      `/printloft/stripe-secret-key-live` (SSM, account `206336709464`).
+- [x] **Account checked** — the `rk_live_…` in SSM is from `acct_1UPYpkDGE12oriKb`,
+      the activated Print Loft account, so it pairs correctly with the live
+      publishable key in `app.config.js`.
 - [ ] **If keeping a restricted (`rk_live_…`) key, grant it Write on** PaymentIntents,
       Refunds **and Tax calculations**. Tax calculations runs first in checkout, so a
       missing permission there blocks the whole flow, not just the final charge.
