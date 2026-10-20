@@ -558,8 +558,8 @@ Before it can take real money in **production**, the following must be in place.
       refund fails silently and has to be issued by hand.
 
 **Payment methods (settings are PER-MODE — test ≠ live)**
-- [ ] **Re-do the payment-method selection in LIVE mode** (test-mode choices don't
-      carry over). Recommended set: **card, Apple Pay, Link, Amazon Pay**.
+- [x] **Payment methods selected in LIVE mode** (2026-10-20): **card, Apple Pay,
+      Amazon Pay, Cash App Pay**. Link and all BNPL are off, ACH is off.
 
       **Why, rather than just a list:**
 
@@ -574,11 +574,13 @@ Before it can take real money in **production**, the following must be in place.
         ~$4.20 vs ~$2.19 — about two points of a twelve-point target margin.
         Worth revisiting if average order value rises: BNPL tends to lift AOV, and
         on a $200 order the extra fee is easier to carry.
-      - **Link is worth keeping.** It is Stripe's saved-payment feature at card
-        rates, and it speeds up repeat checkout. It was on the original "disable"
-        list with no recorded reason.
-      - **Cash App Pay** — card-like economics, narrow audience. No strong
-        argument either way; leave off until there's a reason.
+      - **Link is off.** Card rates and faster repeat checkout, but its entire
+        value is returning customers and there are none at launch. It can also be
+        bank-funded in some configurations, which would hit the same
+        delayed-settlement problem as ACH — verify that before enabling it later.
+      - **Cash App Pay is on.** Card-like economics, confirms synchronously.
+        Note it redirects out of the app and back, so it depends on the
+        `returnURL` scheme being correct (fixed in #72).
       - **Card, Apple Pay, Amazon Pay** — all confirm synchronously and price at
         or near card rates.
 - [ ] **Apple Pay** — create an **Apple Merchant ID**, register it in the Stripe
