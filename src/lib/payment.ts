@@ -97,7 +97,10 @@ export async function runCheckout(input: CheckoutFlowInput): Promise<CheckoutFlo
   const init = await initPaymentSheet({
     merchantDisplayName: 'The Print Loft',
     paymentIntentClientSecret: clientSecret,
-    returnURL: 'mobileapp://stripe-redirect', // for 3DS / bank redirects
+    // MUST match app.json's `scheme` and StripeProvider's urlScheme, or the bank
+    // redirect lands on a scheme the app no longer registers and the customer
+    // never returns from 3D Secure. Test cards skip 3DS, so this only breaks live.
+    returnURL: 'printloft://stripe-redirect', // for 3DS / bank redirects
     defaultBillingDetails: { email: recipient.email, name: recipient.name },
     // Brand the sheet to match the app: 8px radius on fields/options, Gray/200
     // borders, and a Primary/500 + white Pay button. (Stripe's appearance API has
