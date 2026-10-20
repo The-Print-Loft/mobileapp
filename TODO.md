@@ -552,9 +552,10 @@ Before it can take real money in **production**, the following must be in place.
 - [x] **Account checked** — the `rk_live_…` in SSM is from `acct_1UPYpkDGE12oriKb`,
       the activated Print Loft account, so it pairs correctly with the live
       publishable key in `app.config.js`.
-- [ ] **If keeping a restricted (`rk_live_…`) key, grant it Write on** PaymentIntents,
-      Refunds **and Tax calculations**. Tax calculations runs first in checkout, so a
-      missing permission there blocks the whole flow, not just the final charge.
+- [x] **Restricted key permissions verified** — PaymentIntents, Tax calculations,
+      Charges and Refunds all have Write. Refunds matter for order cancellation:
+      without it `POST /v1/orders/:id/cancel` still cancels at Prodigi but the
+      refund fails silently and has to be issued by hand.
 
 **Payment methods (settings are PER-MODE — test ≠ live)**
 - [ ] **Re-do the payment-method selection in LIVE mode** — enable **card, Apple
