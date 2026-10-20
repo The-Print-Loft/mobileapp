@@ -33,7 +33,13 @@ const STRIPE_PUBLISHABLE_KEYS = {
   staging:
     process.env.STRIPE_PUBLISHABLE_KEY_TEST ||
     'pk_test_51UPYprDitbijdasXnchD7MpEtSOH165P2gcHA597gsgyRsrFySBKx95F8HQQPK7tsBR9apBToRfxoJ5w5h5hN7Zh00XxwNyFs3',
-  production: process.env.STRIPE_PUBLISHABLE_KEY_LIVE || '',
+  // Live publishable key (public — safe to commit). Same account as the live
+  // SECRET key in SSM (/printloft/stripe-secret-key-live): acct_1UPYpkDGE12oriKb.
+  // Note this is a DIFFERENT account from the staging sandbox above — the live
+  // and test keys are not two modes of one account here.
+  production:
+    process.env.STRIPE_PUBLISHABLE_KEY_LIVE ||
+    'pk_live_51UPYpkDGE12oriKbfz7EMx3AxOIJxJRdSZB8WJHG2TDO3J0f5QtUeZfuRo6R1m78z5PC8Z8RBxwjEX5wSeXkPvKO00Z8PpUFDq',
 };
 
 function resolveEnvironment() {
