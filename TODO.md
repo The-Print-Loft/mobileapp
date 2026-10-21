@@ -594,7 +594,28 @@ Before it can take real money in **production**, the following must be in place.
 - [ ] **Amazon Pay** — if we keep it, confirm it's configured/approved in live.
 
 **Tax**
-- [ ] **Stripe Tax in live mode** — enable Stripe Tax for the live account and
+- [x] **Stripe Tax configured in live mode** (2026-10-20) — origin address set,
+      preset product category **Physical goods → General – Tangible Goods**
+      (`txcd_99999999`; it was defaulted to a *digital services* code, which would
+      have returned $0 tax on every order), taxes on shipping **Determine
+      automatically**, include-tax-in-prices **Automatic** (excludes for USD, which
+      is what `tax_amount_exclusive` in `services/stripe.ts` reads).
+- [ ] **Illinois registration — WAITING ON IDOR.** Form REG-1 filed 2026-10-20.
+      There was no existing Illinois business tax account, and no EIN either; both
+      were obtained that day. Once IDOR issues the **IBT number** and Certificate of
+      Registration: Stripe → Tax → Registrations → Add registration → Illinois →
+      "I've already registered", with the number and the certificate's effective
+      date. **Until then Stripe returns $0 tax for every order** — it only collects
+      where a registration exists.
+- [ ] **Check Stripe's tax details hold the EIN, not an SSN.** The account was
+      activated before the EIN existed, so it may be filed under the owner's SSN,
+      which would put the 1099-K on the individual rather than the LLC.
+      Settings → Business → Tax details.
+- [ ] **Origin vs destination rates inside Illinois** — unresolved. Illinois treats
+      in-state retailers differently from remote ones, and fulfilment is by Prodigi
+      from its own facilities rather than from the Glen Ellyn address. Worth
+      confirming with IDOR or a CPA; it changes which rate Stripe should apply.
+- [ ] **Stripe Tax (original item)** — enable Stripe Tax for the live account and
       enter the **IL** registration (our only nexus today). Add states as nexus
       grows; the API already applies Stripe Tax at `/v1/checkout` (IL-only).
 
