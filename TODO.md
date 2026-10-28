@@ -600,21 +600,39 @@ Before it can take real money in **production**, the following must be in place.
       have returned $0 tax on every order), taxes on shipping **Determine
       automatically**, include-tax-in-prices **Automatic** (excludes for USD, which
       is what `tax_amount_exclusive` in `services/stripe.ts` reads).
-- [ ] **Illinois registration — WAITING ON IDOR.** Form REG-1 filed 2026-10-20.
-      There was no existing Illinois business tax account, and no EIN either; both
-      were obtained that day. Once IDOR issues the **IBT number** and Certificate of
-      Registration: Stripe → Tax → Registrations → Add registration → Illinois →
-      "I've already registered", with the number and the certificate's effective
-      date. **Until then Stripe returns $0 tax for every order** — it only collects
-      where a registration exists.
+- [x] **Illinois registration — DONE (2026-10-27).** REG-1 filed 2026-10-20,
+      processed by IDOR 2026-10-21 (Sales/Use Tax & E911 Surcharge; the account ID
+      ends `053` — the full number is in the IDOR email and MyTax Illinois, and is
+      deliberately not written down in this public repo). Entered in Stripe as
+      *Standard – state administered taxes*, collecting from 2026-10-28 01:00 UTC.
+      Stripe shows Illinois as **Collecting tax**, and a live preview checkout to a
+      Chicago address returned **$1.45 on $20.00 (7.25%)** — so calculation is
+      genuinely working, not just configured.
+- [ ] **FIRST ST-1 IS DUE 2026-11-20**, covering October, and it will be a **zero
+      return** — Illinois penalises a missed zero return like any other. IDOR
+      assigned **monthly** filing (MyTax Illinois shows month-end periods: 10/31,
+      11/30, 12/31). File at mytax.illinois.gov; the 20th of the following month is
+      the deadline every month after this one.
+- [x] **Automatic filing declined (2026-10-27)** — Stripe only sells filing inside
+      *Tax Complete*, on a 1-year contract. The $90/mo tier includes 4 filings a
+      year; monthly filing needs 12, which is the **$430/mo** tier — $5,160/yr to
+      avoid twelve short forms. Revisit only if Illinois order volume makes that
+      rounding-error money. Note also that Stripe prices Tax Basic at **50¢ per
+      transaction for API integrations** (not the 0.5% shown on the plan card, which
+      is the no-code rate), charged only where we're registered — i.e. on Illinois
+      orders. Worth confirming against the first real invoice.
 - [ ] **Check Stripe's tax details hold the EIN, not an SSN.** The account was
       activated before the EIN existed, so it may be filed under the owner's SSN,
       which would put the 1099-K on the individual rather than the LLC.
       Settings → Business → Tax details.
-- [ ] **Origin vs destination rates inside Illinois** — unresolved. Illinois treats
-      in-state retailers differently from remote ones, and fulfilment is by Prodigi
-      from its own facilities rather than from the Glen Ellyn address. Worth
-      confirming with IDOR or a CPA; it changes which rate Stripe should apply.
+- [ ] **Origin vs destination rates inside Illinois** — unresolved, and now has a
+      concrete number attached. Illinois treats in-state retailers differently from
+      remote ones, and fulfilment is by Prodigi from its own facilities rather than
+      from the Glen Ellyn address. Stripe is charging **7.25%** on a Chicago
+      shipping address, which looks like origin sourcing from Glen Ellyn — Chicago's
+      own combined rate is 10.25%. If Prodigi shipping from out of state makes this
+      destination-sourced, we are under-collecting 3% on every Chicago order, which
+      surfaces at audit rather than at checkout. One question for a CPA.
 - [ ] **Stripe Tax (original item)** — enable Stripe Tax for the live account and
       enter the **IL** registration (our only nexus today). Add states as nexus
       grows; the API already applies Stripe Tax at `/v1/checkout` (IL-only).
