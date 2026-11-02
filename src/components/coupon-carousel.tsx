@@ -21,15 +21,16 @@ const CHECK_BADGE_ICON = `<svg width="24" height="24" viewBox="0 0 24 24" fill="
 /** Ticket-style coupon geometry (the homepage variant). */
 const TICKET = {
   gutter: 16, // 16 leading and trailing — edge to edge within the page gutter
-  height: 144,
+  height: 168, // per the Discount design (370x168)
   radius: 12, // top and bottom corners
   notch: 18, // side notches: a 36-tall semicircle cutting 18 inwards
   inset: 24, // content 24 from the left and right edges, clear of the notches
-  // Decorative illustration on the right, flush to the edge. It's 185x144 — the
+  // Decorative illustration on the right, flush to the edge. It's 160x168 — the
   // ticket's full height — with the right notch already cut out (transparent),
   // but its right-hand corners are square, so it's clipped to the ticket outline.
+  // Rasterised from "Illustration 1 - Edit.svg" at 1x/2x/3x.
   art: require('../../assets/images/coupon-ticket.png'),
-  artWidth: 185,
+  artWidth: 160,
 };
 
 /**
