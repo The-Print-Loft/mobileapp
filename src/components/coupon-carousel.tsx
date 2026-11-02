@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -5,6 +6,8 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
@@ -25,13 +28,42 @@ const TICKET = {
   radius: 12, // top and bottom corners
   notch: 18, // side notches: a 36-tall semicircle cutting 18 inwards
   inset: 24, // content 24 from the left and right edges, clear of the notches
-  // Decorative illustration on the right, flush to the edge. It's 160x168 — the
-  // ticket's full height — with the right notch already cut out (transparent),
-  // but its right-hand corners are square, so it's clipped to the ticket outline.
-  // Rasterised from "Illustration 1 - Edit.svg" at 1x/2x/3x.
-  art: require('../../assets/images/coupon-ticket.png'),
+  // Decorative illustration on the right, flush to the edge. Every theme's art is
+  // 160x168 — the ticket's full height — with the right notch already cut out
+  // (transparent), but square right-hand corners, so it's clipped to the outline.
   artWidth: 160,
+  gap: 12, // 12 between tickets — also the paging stride
 };
+
+/**
+ * Per-offer look. The API names a theme on each offer; an unknown or missing
+ * theme gets the default, so a coupon never renders without art. Each PNG is
+ * rasterised from its design SVG at 1x/2x/3x (see the PRs that added them).
+ * The matching fills are theme roles: `brandSurface` and `holidaySurface`.
+ */
+const THEMES = {
+  welcome: { art: require('../../assets/images/coupon-ticket.png') },
+  holiday: { art: require('../../assets/images/coupon-ticket-holiday.png') },
+} as const;
+type TicketTheme = keyof typeof THEMES;
+
+function ticketTheme(name: string | undefined): TicketTheme {
+  return name && name in THEMES ? (name as TicketTheme) : 'welcome';
+}
+
+/** "11:59 PM, 12/31/26" — the design's format, in the device's local time. */
+function formatValidUntil(iso: string): string {
+  const d = new Date(iso);
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const date = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+  return `${time}, ${date}`;
+}
+
+/**
+ * Pagination dots under the tickets. The spec gives the colours and the 8 gap;
+ * the 6 dot and 6 spacing are a reading of it, not from a design file.
+ */
+const DOTS = { gap: 8, size: 6, spacing: 6 };
 
 /**
  * The ticket outline: a rounded rectangle with a semicircular notch cut into the
@@ -46,6 +78,7 @@ function TicketShape({
   height,
   fill,
   stroke,
+  art,
 }: {
   /** Unique per ticket — the SVG clip-path id must not collide across cards. */
   id: string;
@@ -53,6 +86,8 @@ function TicketShape({
   height: number;
   fill: string;
   stroke: string;
+  /** The theme's illustration (a bundled PNG). */
+  art: (typeof THEMES)[TicketTheme]['art'];
 }) {
   const r = TICKET.radius;
   const n = TICKET.notch;
@@ -90,7 +125,7 @@ function TicketShape({
       {/* The art is clipped to the outline so its square corners take the ticket's
           12 radius, and its transparent notch lines up with the cut-out. */}
       <SvgImage
-        href={TICKET.art}
+        href={art}
         x={width - TICKET.artWidth}
         y={0}
         width={TICKET.artWidth}
@@ -141,17 +176,36 @@ export function CouponCarousel({
   const { width: screenWidth } = useWindowDimensions();
   const ticket = variant === 'ticket';
   const ticketWidth = screenWidth - TICKET.gutter * 2;
-  return (
+  // One ticket per page: the ticket plus the gap to the next.
+  const pageWidth = ticketWidth + TICKET.gap;
+  // Which ticket is in view — drives the pagination dots. Read when the snap
+  // settles, not on every scroll frame, so the dot doesn't flicker mid-swipe.
+  const [page, setPage] = useState(0);
+  const onMomentumScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const i = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
+      setPage(Math.max(0, Math.min(offers.length - 1, i)));
+    },
+    [pageWidth, offers.length],
+  );
+  const scroller = (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={style}
+      // On the ticket the caller's style goes on the wrapper below, so the dots
+      // sit inside the same block and its spacing applies to both.
+      style={ticket ? undefined : style}
       contentContainerStyle={styles.content}
       // Tickets are full width, so page one at a time instead of free-scrolling.
-      snapToInterval={ticket ? ticketWidth + 12 : undefined}
-      decelerationRate={ticket ? 'fast' : 'normal'}>
+      snapToInterval={ticket ? pageWidth : undefined}
+      decelerationRate={ticket ? 'fast' : 'normal'}
+      onMomentumScrollEnd={ticket ? onMomentumScrollEnd : undefined}>
       {offers.map((c, i) => {
         const active = activeCode === c.code;
+        const look = ticketTheme(c.theme);
+        // Same fill whether or not it's applied — the Active badge and the button
+        // carry the state on the ticket, not the background.
+        const fill = look === 'holiday' ? theme.holidaySurface : theme.brandSurface;
         return (
           <View
             key={c.code}
@@ -171,10 +225,9 @@ export function CouponCarousel({
                 id={c.code}
                 width={ticketWidth}
                 height={TICKET.height}
-                // Same fill whether or not it's applied — the Active badge and the
-                // button carry the state on this style, not the background.
-                fill={theme.brandSurface}
+                fill={fill}
                 stroke={theme.strokeFaint}
+                art={THEMES[look].art}
               />
             )}
             {/* On the ticket, keep the copy clear of the art on the right: a long
@@ -187,6 +240,12 @@ export function CouponCarousel({
               }>
               <Text style={[styles.desc, { color: theme.textTertiary }]}>{c.title}</Text>
               <Text style={[styles.code, { color: theme.text }]}>{c.code}</Text>
+              {/* Only offers with an end date get the line — WELCOME20 has none. */}
+              {ticket && c.expiresAt && (
+                <Text style={[styles.validUntil, { color: theme.textTertiary }]}>
+                  Valid until: {formatValidUntil(c.expiresAt)}
+                </Text>
+              )}
             </View>
 
             {/* "Active" badge — pinned to the top-right once applied. */}
@@ -234,6 +293,27 @@ export function CouponCarousel({
       })}
     </ScrollView>
   );
+  if (!ticket) return scroller;
+  return (
+    <View style={style}>
+      {scroller}
+      {/* Pagination dots, 8 below the tickets — only when there's something to
+          page to. Gray/black at 35% for the ticket in view, 10% for the rest. */}
+      {offers.length > 1 && (
+        <View style={styles.dots}>
+          {offers.map((c, i) => (
+            <View
+              key={c.code}
+              style={[
+                styles.dot,
+                { backgroundColor: i === page ? theme.pageDotActive : theme.pageDot },
+              ]}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -241,7 +321,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, // first coupon 16 from the leading edge
   },
   gap: {
-    marginLeft: 12, // 12 between coupons
+    marginLeft: TICKET.gap, // 12 between coupons
+  },
+  dots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: DOTS.gap, // 8 below the tickets
+    columnGap: DOTS.spacing,
+  },
+  dot: {
+    width: DOTS.size,
+    height: DOTS.size,
+    borderRadius: DOTS.size / 2,
   },
   ticket: {
     height: TICKET.height,
@@ -290,6 +382,12 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.titleBold, // Title 2 / Bold (Crimson Text) 20/30, Gray/black
     fontSize: 20,
     lineHeight: 30,
+  },
+  validUntil: {
+    marginTop: 8, // 8 below the code, per the Holiday design
+    fontFamily: FontFamily.bodyMedium, // Body 2 / Medium 14/20, Gray/700 — same as the title
+    fontSize: 14,
+    lineHeight: 20,
   },
   apply: {
     marginTop: 42, // 42 from the code to the button
