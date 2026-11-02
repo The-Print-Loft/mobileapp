@@ -51,12 +51,17 @@ function ticketTheme(name: string | undefined): TicketTheme {
   return name && name in THEMES ? (name as TicketTheme) : 'welcome';
 }
 
-/** "11:59 PM, 12/31/26" — the design's format, in the device's local time. */
+/**
+ * "12/31/26" — the date only, in the device's local time. Offers end at the last
+ * minute of a day, so "valid until <date>" reads as "through that day" and the
+ * 11:59 PM adds nothing.
+ */
 function formatValidUntil(iso: string): string {
-  const d = new Date(iso);
-  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  const date = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
-  return `${time}, ${date}`;
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: '2-digit',
+  });
 }
 
 /**
@@ -239,7 +244,9 @@ export function CouponCarousel({
                   : undefined
               }>
               <Text style={[styles.desc, { color: theme.textTertiary }]}>{c.title}</Text>
-              <Text style={[styles.code, { color: theme.text }]}>{c.code}</Text>
+              <Text style={[styles.code, ticket && styles.ticketCode, { color: theme.text }]}>
+                {c.code}
+              </Text>
               {/* Only offers with an end date get the line — WELCOME20 has none. */}
               {ticket && c.expiresAt && (
                 <Text style={[styles.validUntil, { color: theme.textTertiary }]}>
@@ -382,6 +389,12 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.titleBold, // Title 2 / Bold (Crimson Text) 20/30, Gray/black
     fontSize: 20,
     lineHeight: 30,
+  },
+  ticketCode: {
+    // The homepage ticket's code is a step larger than the cart card's: Crimson
+    // Text Bold 24/32. The cart card keeps Title 2 (20/30).
+    fontSize: 24,
+    lineHeight: 32,
   },
   validUntil: {
     marginTop: 8, // 8 below the code, per the Holiday design
