@@ -60,10 +60,10 @@ function formatValidUntil(iso: string): string {
 }
 
 /**
- * Pagination dots under the tickets. The spec gives the colours and the 8 gap;
- * the 6 dot and 6 spacing are a reading of it, not from a design file.
+ * Pagination dots under the tickets: 8 below, 8 apart, Gray/black at 35% / 10%.
+ * The 6 dot size is a reading of the spec, not from a design file.
  */
-const DOTS = { gap: 8, size: 6, spacing: 6 };
+const DOTS = { gap: 8, size: 6, spacing: 8 };
 
 /**
  * The ticket outline: a rounded rectangle with a semicircular notch cut into the
