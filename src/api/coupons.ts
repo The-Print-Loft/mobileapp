@@ -24,6 +24,14 @@ export type CouponOffer = {
   description: string;
   discount: CouponDiscount;
   fulfillmentType: 'prodigi' | 'walgreens' | 'all';
+  /** ISO end of the offer's validity window; absent when it doesn't expire. */
+  expiresAt?: string;
+  /**
+   * Which look the homepage ticket uses — `"welcome"` | `"holiday"` today. The
+   * app maps it to bundled art + a fill and falls back to the default for any
+   * value it doesn't know, so a new theme on the API can't break an old app.
+   */
+  theme?: string;
 };
 
 /** A cart line as the coupon endpoints expect it. */
@@ -63,7 +71,11 @@ export async function getCoupons(
     },
     signal,
   });
-  return data.coupons ?? [];
+  // An offer whose window has closed is dropped here, so neither the homepage
+  // ticket nor the cart's carousel shows a code the API would reject as EXPIRED.
+  // This is the device's clock, so it's a courtesy — the API stays the enforcement.
+  const now = Date.now();
+  return (data.coupons ?? []).filter((c) => !c.expiresAt || Date.parse(c.expiresAt) > now);
 }
 
 /** Preview a code against the current basket (for the cart's Apply). */
