@@ -3,6 +3,7 @@ import { DEFAULT_FULFILLMENT, type FulfillmentType } from './config';
 import type {
   CatalogItem,
   CatalogResponse,
+  Category,
   PrintAreaSizesResponse,
   Product,
   ProductResponse,
@@ -17,16 +18,21 @@ import type {
  * unwrap it to a plain `CatalogItem[]` here.
  */
 
+export type Tier1Result = { categories: Category[]; items: CatalogItem[] };
+
 export async function getTier1(
   fulfillmentType: FulfillmentType = DEFAULT_FULFILLMENT,
   signal?: AbortSignal,
-): Promise<CatalogItem[]> {
+): Promise<Tier1Result> {
   const data = await apiRequest<CatalogResponse>('/tier1', {
     method: 'POST',
     body: { fulfillmentType },
     signal,
   });
-  return data.shipToYou ?? data.sameDayPickup ?? [];
+  return {
+    categories: data.categories ?? [],
+    items: data.shipToYou ?? data.sameDayPickup ?? [],
+  };
 }
 
 export async function getTier2(

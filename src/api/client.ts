@@ -1,4 +1,5 @@
-import { API_BASE, APP_VERSION } from './config';
+import { APP_VERSION } from './config';
+import { getApiBaseUrl } from './environment';
 import type { ApiErrorBody } from './types';
 
 /**
@@ -29,7 +30,8 @@ type RequestOptions = {
 };
 
 function buildUrl(path: string, query?: RequestOptions['query']): string {
-  const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+  // Read the base URL per request so the dev environment toggle takes effect.
+  const url = `${getApiBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
   if (!query) return url;
   const params = Object.entries(query)
     .filter(([, v]) => v !== undefined)

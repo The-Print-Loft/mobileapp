@@ -6,7 +6,9 @@ type AsyncState<T> = {
   data: T | null;
   error: ApiError | null;
   loading: boolean;
-  /** Re-run the fetch (e.g. from a Retry button). */
+  /** True during a reload that runs while data is already shown (pull-to-refresh). */
+  refreshing: boolean;
+  /** Re-run the fetch (e.g. from a Retry button or pull-to-refresh). */
   reload: () => void;
 };
 
@@ -22,6 +24,7 @@ export function useAsync<T>(
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [nonce, setNonce] = useState(0);
 
   const reload = useCallback(() => setNonce((n) => n + 1), []);
@@ -29,7 +32,10 @@ export function useAsync<T>(
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
-    setLoading(true);
+    // Full-screen loader only when there's nothing shown yet; a reload while
+    // data is already present is a background refresh (drives pull-to-refresh).
+    if (data !== null) setRefreshing(true);
+    else setLoading(true);
     setError(null);
 
     loader(controller.signal)
@@ -45,7 +51,10 @@ export function useAsync<T>(
         );
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setRefreshing(false);
+        }
       });
 
     return () => {
@@ -55,5 +64,5 @@ export function useAsync<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, nonce]);
 
-  return { data, error, loading, reload };
+  return { data, error, loading, refreshing, reload };
 }
