@@ -77,6 +77,13 @@ export const Colors = {
   brandSurface: Brand.lightBackground, // #F5F5F0
   strokeFaint: Stroke[10], // black @ 10% — "Additional stroke/10"
   strokeFainter: Stroke[5], // black @ 5% — "Additional stroke/5"
+  // Homepage coupon pagination dots — Gray/black at 35% (the ticket in view) and
+  // 10% (the rest).
+  pageDotActive: withAlpha(Gray[900], 0.35),
+  pageDot: withAlpha(Gray[900], 0.1),
+  // The holiday coupon ticket's fill, from "Holiday Discount.svg". Not a palette
+  // primitive — it exists only for that design, so it lives here as a role.
+  holidaySurface: '#E2E2E9',
 
   // Discount / savings amounts (promo, discounts) — Primary/600.
   discount: Primary[600],
