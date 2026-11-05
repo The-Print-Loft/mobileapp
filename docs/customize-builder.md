@@ -42,7 +42,7 @@ never leaks one photo's changes onto another (`PickedPhoto`):
 ```ts
 type PickedPhoto = {
   uri: string; width?: number; height?: number;   // as picked
-  rotated: boolean;            // 90° off the photo's natural orientation
+  rotated: boolean;            // the print FRAME is turned 90°; the photo stays upright
   fillMode: 'fit' | 'fill';    // contain vs cover inside the frame
   filter: string;              // Effect id ('none' = original)
   brightness: number;          // Adjust values, neutral at 0 (−100..100)
@@ -100,12 +100,11 @@ full-res print.
   `Skia.Image.MakeImageFromEncoded`. Remote/bundled sources fall back to
   `useImage`. Skia also has **no HEIC codec**, which is why the pickers force
   JPEG (`Compatible`).
-- **Fit / fill / rotate geometry** — we compute the scaled, **centered** draw rect
+- **Fit / fill geometry** — we compute the scaled, **centered** draw rect
   ourselves rather than trusting Skia's `fit` (which *anchors*, not centers,
-  inside an offset rect): `scale = cover ? max(target/img) : min(target/img)`,
-  against **target dims that swap when rotated** (so after the 90° rotation the
-  image still fills/fits). The image is drawn centered and the `<Group>` rotates
-  about that same center via `origin`.
+  inside an offset rect): `scale = cover ? max(frame/img) : min(frame/img)`. The
+  photo is always drawn upright — rotate changes the frame it is drawn into, not
+  the photo.
 - **Color** — a `<ColorMatrix matrix={…}>` child applies the combined
   Effects+Adjust matrix (see §12).
 - **`SkiaThumb`** — a tiny sibling that renders one 80×80 preview from an
@@ -129,9 +128,12 @@ Icon swaps `FILL_ICON` ↔ `FIT_ICON`.
 
 ### 4. Rotate (middle toolbar button)
 
-Flips `rotated` on the active photo — reorients **both** the frame and the photo
-90° (so a landscape photo can become a portrait print). The icon shows the
-orientation you'd rotate *to* (`displayedLandscape ? ROTATE_PORTRAIT : ROTATE_LANDSCAPE`).
+Flips `rotated` on the active photo — turns the **frame only** (portrait print ↔
+landscape print). The photo stays upright and is re-fit / re-filled into the new
+frame, so a landscape photo can become a portrait print without being turned on
+its side. The icon shows the orientation the frame would turn *to*
+(`displayedLandscape ? ROTATE_PORTRAIT : ROTATE_LANDSCAPE`). **Disabled on square
+sizes**, which have no other orientation.
 
 ### 5. Pinch-zoom + pan (`src/components/zoom-pan-frame.tsx`)
 

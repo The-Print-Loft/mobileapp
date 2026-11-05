@@ -43,7 +43,7 @@ type RawPhoto = { uri: string; width?: number; height?: number };
 /** A photo on the canvas, carrying its own edit state so rotation / fit-fill are
  *  per-photo (not shared across the whole list). */
 type PickedPhoto = RawPhoto & {
-  rotated: boolean; // 90° off the photo's natural (EXIF-correct) orientation
+  rotated: boolean; // the print FRAME is turned 90° from the photo's natural orientation — the photo itself stays upright
   fillMode: 'fit' | 'fill'; // contain vs cover
   filter: string; // selected filter id ('none' = original)
   brightness: number; // Adjust values, neutral at 0
@@ -235,8 +235,9 @@ export default function BuilderScreen() {
   const fillMode = shown?.fillMode ?? 'fit';
   const rotated = shown?.rotated ?? false;
   const shownNaturalLandscape = !!(shown?.width && shown?.height && shown.width > shown.height);
-  // The rotate icon reflects the orientation the photo is currently displayed in
-  // (portrait → offer rotate-to-landscape, and vice versa).
+  // The frame starts in the photo's own orientation; rotate turns the FRAME only
+  // (portrait print ↔ landscape print) and the photo stays upright inside it. The
+  // rotate icon shows the orientation the frame would turn to.
   const displayedLandscape = shownNaturalLandscape !== rotated;
 
   // The Effects + Adjust color matrix for the canvas preview (and, later, the
@@ -273,21 +274,19 @@ export default function BuilderScreen() {
       : parsePrintSize(size);
   const [canvasArea, setCanvasArea] = useState({ w: 0, h: 0 });
   const frame = computeFrame(frameDims, displayedLandscape, canvasArea);
+  // A square print has no other orientation to turn to, so rotate is disabled.
+  const frameSquare = !!frameDims && Math.abs(frameDims[0] - frameDims[1]) / Math.max(...frameDims) < 0.01;
 
-  // The photo's on-frame footprint at zoom 1 (accounts for fit/fill + rotate),
+  // The photo's on-frame footprint at zoom 1 (accounts for fit/fill),
   // which the zoom/pan clamp needs so panning never uncovers the frame. Null
   // when we don't know the photo's pixel size (then zoom/pan is disabled).
   const content = (() => {
     if (!frame || !shown?.width || !shown?.height) return null;
-    const targetW = rotated ? frame.height : frame.width;
-    const targetH = rotated ? frame.width : frame.height;
     const base =
       fillMode === 'fill'
-        ? Math.max(targetW / shown.width, targetH / shown.height)
-        : Math.min(targetW / shown.width, targetH / shown.height);
-    const dispW = shown.width * base;
-    const dispH = shown.height * base;
-    return { w: rotated ? dispH : dispW, h: rotated ? dispW : dispH };
+        ? Math.max(frame.width / shown.width, frame.height / shown.height)
+        : Math.min(frame.width / shown.width, frame.height / shown.height);
+    return { w: shown.width * base, h: shown.height * base };
   })();
 
   // Patch the active photo's edit state (rotation / fit-fill / filter).
@@ -398,7 +397,6 @@ export default function BuilderScreen() {
               <SkiaPhoto
                 uri={shown.uri}
                 fit={fillMode === 'fill' ? 'cover' : 'contain'}
-                rotated={rotated}
                 matrix={photoMatrix}
               />
             );
@@ -469,12 +467,13 @@ export default function BuilderScreen() {
         </Pressable>
         <Pressable
           style={[styles.toolButton, styles.toolDivider, { borderLeftColor: theme.borderStrong }]}
+          disabled={frameSquare}
           onPress={() => patchActive({ rotated: !rotated })}>
           <SvgXml
             xml={displayedLandscape ? ROTATE_PORTRAIT_ICON : ROTATE_LANDSCAPE_ICON}
             width={24}
             height={24}
-            color={theme.text}
+            color={frameSquare ? theme.iconDisabled : theme.text}
           />
         </Pressable>
         {/* Filter — opens the filter sheet. */}
@@ -738,7 +737,7 @@ const styles = StyleSheet.create({
     left: 16, // 16 leading
     right: 16, // 16 trailing
     // bottom = dockHeight + 32 (32 above the strip) is applied inline.
-    overflow: 'hidden', // crop 'cover' / a rotated photo to the frame
+    overflow: 'hidden', // crop a 'cover' photo to the frame
   },
   printFrame: {
     position: 'absolute',

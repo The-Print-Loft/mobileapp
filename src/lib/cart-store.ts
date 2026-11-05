@@ -15,6 +15,8 @@ export type PhotoEdit = {
   uri: string;
   width?: number;
   height?: number;
+  /** The print frame is turned 90° from the photo's natural orientation. The
+   *  photo itself is never rotated. */
   rotated: boolean;
   fillMode: 'fit' | 'fill';
   filter: string;
