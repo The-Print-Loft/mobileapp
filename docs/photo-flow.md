@@ -119,10 +119,12 @@ that canvas, the three stay locked together: preview ⇔ crop ⇔ print.
 
 ### Orientation & the frame
 
-The frame **follows the photo**: a landscape photo → landscape frame, portrait →
-portrait, and the **rotate** control flips both together (it reorients the whole
-print, photo included). The frame is fit into the on-screen canvas area, centered,
-with a **hairline border** marking the print edge.
+The frame **starts in the photo's orientation**: a landscape photo → landscape
+frame, portrait → portrait. The **rotate** control turns the **frame only** —
+portrait print ↔ landscape print — and the photo stays upright inside it, so a
+landscape photo can be cropped into a portrait print. On a square size there is no
+other orientation, so rotate is disabled. The frame is fit into the on-screen
+canvas area, centered, with a **hairline border** marking the print edge.
 
 ### Positioning — pinch-zoom + pan
 
@@ -134,8 +136,8 @@ Inside the frame the customer positions the crop with pinch + pan
 - **Clamped to the photo's on-frame footprint** — pan/zoom are bounded so the photo
   **always covers the frame**; a print **never shows a white gap** from over-panning
   (an aggressive pan stops at the photo edge). The clamp uses the photo's on-frame
-  size at scale 1, which the builder computes from the frame + photo pixels + the
-  current fit/fill and rotation.
+  size at scale 1, which the builder computes from the frame (in its current
+  orientation) + photo pixels + the current fit/fill.
 - **Per-photo and persisted** — the committed `scale` / `offsetX` / `offsetY` live on
   each `PickedPhoto`, so they **survive switching photos** (re-seeded by photo uri)
   and will **drive the full-res export crop**.
@@ -170,8 +172,8 @@ canvas is safe for edge content.
 5. **Quality check** photo px vs the canvas DPI (advisory warning).
 
 > **Worked example — acrylic 11×14 (`default` area).** Canvas `3417×4317` →
-> frame aspect `0.792` (portrait). A `4032×3024` landscape photo, rotated to
-> portrait and set to fill, covers the frame and crops the long edges; export is
+> frame aspect `0.792` (portrait). A `4032×3024` landscape photo, with the frame
+> rotated to portrait and set to fill, covers the frame and crops its sides; export is
 > `3417×4317`. A photo under ~`3417×4317` for its mapped axis trips the low-DPI
 > warning.
 
@@ -217,7 +219,7 @@ a print that can't ship. **Not built yet.**
 | PDP — size, Select → picker (multi) → navigate | `src/app/(tabs)/(home)/product/[id].tsx` |
 | Builder — fetch print spec, WYSIWYG frame, per-photo quality check, re-pick | `src/app/builder/[sku].tsx` |
 | WYSIWYG frame geometry — `parsePrintSize`, `computeFrame` | `src/app/builder/[sku].tsx` |
-| Skia canvas render — fit/fill/rotate, color matrix | `src/components/skia-photo.tsx` |
+| Skia canvas render — fit/fill, color matrix | `src/components/skia-photo.tsx` |
 | API client — `getProduct`, `getPrintAreaSizes` | `src/api/catalog.ts` |
 | Async fetch + loading/error/retry | `src/hooks/use-async.ts` |
 | Product / variant / print-area types | `src/api/types.ts` |
