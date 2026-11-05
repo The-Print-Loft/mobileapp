@@ -116,12 +116,12 @@ export interface Product {
   packaging: string[];
   variants: ProductVariant[];
   /**
-   * Which product preview the builder can offer — a named kind such as
-   * `"canvasWrap"` or `"frame"`, authored per product in the CMS. Absent means
-   * none. It's a kind rather than a flag because a preview only exists if this
-   * build knows how to draw it: the builder shows the button for kinds in its
-   * own supported list and hides it for anything else, so a kind added on the
-   * API never produces a dead button in an older app.
+   * Which product preview the builder can offer — a named kind (`"frame"`,
+   * `"canvasWrap"`, `"floatFrame"`, `"posterHanger"`), authored per product in
+   * the CMS. Absent means none. It's a kind rather than a flag because a preview
+   * only exists if this build knows how to draw it: the builder shows the button
+   * for kinds in its own supported list and hides it for anything else, so a
+   * kind added on the API never produces a dead button in an older app.
    */
   preview?: string;
 }

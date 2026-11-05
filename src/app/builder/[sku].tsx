@@ -165,7 +165,12 @@ function HeaderBack() {
  * product with a preview kind until that lands — staging reads CMS drafts, so a
  * draft-only value is the way to see the button without exposing it.
  */
-const PREVIEW_KINDS = ['canvasWrap', 'frame'] as const;
+const PREVIEW_KINDS = [
+  'frame', // framed prints — the frame colour and matte around the photo
+  'canvasWrap', // canvas + eco canvas — what lands on the wrapped edges
+  'floatFrame', // floating framed canvas — the canvas inside its float frame
+  'posterHanger', // poster hangers — the rails top and bottom
+] as const;
 type PreviewKind = (typeof PREVIEW_KINDS)[number];
 
 function supportedPreview(kind: string | undefined): PreviewKind | null {
