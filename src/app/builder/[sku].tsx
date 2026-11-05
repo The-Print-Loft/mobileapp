@@ -167,9 +167,6 @@ function HeaderBack() {
  */
 const PREVIEW_KINDS = [
   'frame', // framed prints — the frame colour and matte around the photo
-  'canvasWrap', // canvas + eco canvas — what lands on the wrapped edges
-  'floatFrame', // floating framed canvas — the canvas inside its float frame
-  'posterHanger', // poster hangers — the rails top and bottom
 ] as const;
 type PreviewKind = (typeof PREVIEW_KINDS)[number];
 
