@@ -26,6 +26,7 @@ import {
   FILTER_ICON,
   FIT_ICON,
   PLUS_ICON,
+  PREVIEW_ICON,
   ROTATE_LANDSCAPE_ICON,
   ROTATE_PORTRAIT_ICON,
   SATURATION_ICON,
@@ -155,6 +156,39 @@ function HeaderBack() {
 }
 
 /**
+ * Preview kinds this build offers. The product names one (CMS → API, on
+ * `product.preview`); anything not listed — including a kind added to the API
+ * after this build shipped — gets no button rather than a dead one.
+ *
+ * The preview itself is the next piece of work. Today the button is in place and
+ * gated; its action is a TODO, as the PDP's share button is. Don't publish a
+ * product with a preview kind until that lands — staging reads CMS drafts, so a
+ * draft-only value is the way to see the button without exposing it.
+ */
+const PREVIEW_KINDS = ['canvasWrap', 'frame'] as const;
+type PreviewKind = (typeof PREVIEW_KINDS)[number];
+
+function supportedPreview(kind: string | undefined): PreviewKind | null {
+  return (PREVIEW_KINDS as readonly string[]).includes(kind ?? '') ? (kind as PreviewKind) : null;
+}
+
+/** Header Preview — top-right on Customize, only for products with a preview. */
+function HeaderPreviewButton() {
+  const theme = useTheme();
+  return (
+    <Pressable
+      onPress={() => {
+        // TODO: open the product preview (canvas wrap / frame) for this selection.
+      }}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel="Preview">
+      <SvgXml xml={PREVIEW_ICON} width={24} height={24} color={theme.text} />
+    </Pressable>
+  );
+}
+
+/**
  * Product builder — the photo editor. Reached from the PDP once a size and
  * photos are chosen (see `docs/photo-flow.md`). Lives at the root of the
  * navigation tree (a sibling of the `(tabs)` group), so it pushes OVER the tab
@@ -177,6 +211,9 @@ export default function BuilderScreen() {
   // Product details come from the selection store (set on the PDP), so the full
   // product flows through cleanly rather than via route-param strings.
   const selection = useSelection();
+  // The product names the preview it has (CMS → API); the header button appears
+  // only when this build can draw that kind. See PREVIEW_KINDS.
+  const previewKind = supportedPreview(selection?.product.preview);
   const title = selection?.product.name ?? '';
   const size = selection
     ? `${selection.variant.size} ${selection.variant.unit ?? 'in'}`
@@ -379,6 +416,10 @@ export default function BuilderScreen() {
         options={{
           title: 'Customize',
           headerLeft: () => <HeaderBack />,
+          // Top-right, mirroring the PDP's share slot: preview is a view of the
+          // whole product, not an edit to the photo, so it stays out of the
+          // toolbar. Absent (not disabled) for products with no preview.
+          headerRight: previewKind ? () => <HeaderPreviewButton /> : undefined,
         }}
       />
       <PhotoCanvasBackground />

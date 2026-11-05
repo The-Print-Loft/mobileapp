@@ -46,6 +46,10 @@ export const PLUS_ICON = `<svg width="24" height="24" viewBox="0 0 24 24" fill="
 // Close (X) — dismisses the filter sheet.
 export const CLOSE_ICON = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+/** Eye — "preview this product". The builder's header-right action, shown only
+ *  for products that name a preview kind this build can draw. */
+export const PREVIEW_ICON = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 // Adjust tab icons (32x32) — mixed fill + stroke, tinted via currentColor.
 export const BRIGHTNESS_ICON = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.9993 22.666C19.6812 22.666 22.666 19.6812 22.666 15.9993C22.666 12.3174 19.6812 9.33268 15.9993 9.33268C12.3174 9.33268 9.33268 12.3174 9.33268 15.9993C9.33268 19.6812 12.3174 22.666 15.9993 22.666Z" fill="currentColor"/><path d="M15.9993 2.66602V5.33268M15.9993 26.666V29.3327M5.33268 15.9993H2.66602M8.41817 8.41817L6.53255 6.53255M23.5805 8.41817L25.4661 6.53255M8.41817 23.586L6.53255 25.4716M23.5805 23.586L25.4661 25.4716M29.3327 15.9993H26.666M22.666 15.9993C22.666 19.6812 19.6812 22.666 15.9993 22.666C12.3174 22.666 9.33268 19.6812 9.33268 15.9993C9.33268 12.3174 12.3174 9.33268 15.9993 9.33268C19.6812 9.33268 22.666 12.3174 22.666 15.9993Z" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
