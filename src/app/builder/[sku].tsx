@@ -155,23 +155,6 @@ function HeaderBack() {
   );
 }
 
-/**
- * Preview kinds this build offers. The product names one (CMS → API, on
- * `product.preview`); anything not listed — including a kind added to the API
- * after this build shipped — gets no button rather than a dead one.
- *
- * The preview itself is the next piece of work. Today the button is in place and
- * gated; its action is a TODO, as the PDP's share button is. Don't publish a
- * product with a preview kind until that lands — staging reads CMS drafts, so a
- * draft-only value is the way to see the button without exposing it.
- */
-const PREVIEW_KINDS = ['canvasWrap', 'frame'] as const;
-type PreviewKind = (typeof PREVIEW_KINDS)[number];
-
-function supportedPreview(kind: string | undefined): PreviewKind | null {
-  return (PREVIEW_KINDS as readonly string[]).includes(kind ?? '') ? (kind as PreviewKind) : null;
-}
-
 /** Header Preview — top-right on Customize, only for products with a preview. */
 function HeaderPreviewButton() {
   const theme = useTheme();
@@ -211,9 +194,9 @@ export default function BuilderScreen() {
   // Product details come from the selection store (set on the PDP), so the full
   // product flows through cleanly rather than via route-param strings.
   const selection = useSelection();
-  // The product names the preview it has (CMS → API); the header button appears
-  // only when this build can draw that kind. See PREVIEW_KINDS.
-  const previewKind = supportedPreview(selection?.product.preview);
+  // Preview is a per-product switch in the CMS (some framed products have one,
+  // some don't); the header button appears only where it's on.
+  const hasPreview = selection?.product.preview === true;
   const title = selection?.product.name ?? '';
   const size = selection
     ? `${selection.variant.size} ${selection.variant.unit ?? 'in'}`
@@ -419,7 +402,7 @@ export default function BuilderScreen() {
           // Top-right, mirroring the PDP's share slot: preview is a view of the
           // whole product, not an edit to the photo, so it stays out of the
           // toolbar. Absent (not disabled) for products with no preview.
-          headerRight: previewKind ? () => <HeaderPreviewButton /> : undefined,
+          headerRight: hasPreview ? () => <HeaderPreviewButton /> : undefined,
         }}
       />
       <PhotoCanvasBackground />
