@@ -22,7 +22,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": ["android.permission.WRITE_EXTERNAL_STORAGE"]
     },
     "web": {
       "output": "static",
@@ -41,7 +42,16 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow SameDaySnaps to access your photos so you can add them to your prints."
+          "photosPermission": "Allow Print Loft to access your photos so you can browse them and turn them into prints.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Print Loft to access your photos so you can browse them and turn them into prints.",
+          "savePhotosPermission": "Allow Print Loft to save photos to your library.",
+          "granularPermissions": ["photo"]
         }
       ],
       [

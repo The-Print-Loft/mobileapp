@@ -56,6 +56,28 @@ rm -rf node_modules && npm ci
 node -p "require('expo-modules-jsi/package.json').version"   # must print 57.0.4
 ```
 
+### Adding an Expo native module — pin it to this project's core
+`npx expo install <pkg>` writes a `~57.0.x` range, and npm takes the **newest** patch in
+it. Expo publishes module patches against newer `expo-modules-core` releases than the
+`57.0.7` this project runs, so the newest one can reference core symbols that don't
+exist here. It compiles, then **aborts at launch** with:
+
+```
+Symbol not found: _$s15ExpoModulesCore10BaseModuleC11willDestroyyyFTj
+Referenced from: …/ExpoMediaLibrary.framework/ExpoMediaLibrary
+```
+
+That happened with `expo-media-library@57.0.6` (2026-11-06). The fix is to pin the patch
+released **before** the installed core (`npm view <pkg> time` vs
+`npm view expo-modules-core time`), exactly, with no `~`:
+
+```bash
+npm install --save-exact expo-media-library@57.0.3
+```
+
+Then `cd ios && pod install` and rebuild. Check afterwards that `expo-modules-jsi` still
+prints `57.0.4`.
+
 ### The Swift date patch (auto-applied)
 `patches/expo-modules-jsi+57.0.4.patch` fixes an `abs()` ambiguity in
 `JavaScriptCodable+Date.swift` under Swift 6.2 (Xcode 26.x). It applies automatically via
