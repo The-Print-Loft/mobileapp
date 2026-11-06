@@ -17,6 +17,8 @@ business. It consumes the SDS API; it never talks to Prodigi / Stripe / Storyblo
 ## Read these first
 - **[docs/setup.md](./docs/setup.md)** — local setup + build gotchas (use `npm ci`, the
   Swift patch, regenerating `ios/`). **Start here on a new machine.**
+- [docs/device-install.md](./docs/device-install.md) — installing on a physical iPhone
+  (free Print Loft team now; EAS once the LLC's Apple enrollment is approved)
 - [docs/photo-flow.md](./docs/photo-flow.md) — capture / customize / upload pipeline
 - [docs/cart.md](./docs/cart.md) · [docs/checkout.md](./docs/checkout.md) · [docs/orders.md](./docs/orders.md) — cart → checkout → order tracking
 - [docs/customize-builder.md](./docs/customize-builder.md) — the Skia photo editor
