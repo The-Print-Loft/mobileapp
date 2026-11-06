@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Print Loft",
-    "slug": "same-day-snaps",
+    "slug": "print-loft",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -68,15 +68,15 @@
     },
     "extra": {
       "eas": {
-        "projectId": "bbe9376b-c215-4b2e-af33-37e1da3fc7c5"
+        "projectId": "e549d768-586c-451b-805b-af19d44b0d20"
       }
     },
-    "owner": "same-day-snaps",
+    "owner": "the-print-loft-llc",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/bbe9376b-c215-4b2e-af33-37e1da3fc7c5"
+      "url": "https://u.expo.dev/e549d768-586c-451b-805b-af19d44b0d20"
     }
   }
 }
